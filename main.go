@@ -20,7 +20,7 @@ func main() {
 	argoApiToken := config.ArgoApiToken // might be nil
 	if config.AuthMode == internal.LoginMode {
 		// ensure having an API Token
-		argoApiClient := internal.NewArgoApiClient()
+		argoApiClient := internal.NewArgoLoginClient()
 		var apiToken, err = argoApiClient.GetApiToken(config.ArgoServer, config.ApiUsername, config.ApiPassword)
 		if err != nil {
 			fmt.Println("Unable to get API token from ArgoCD: ", err)

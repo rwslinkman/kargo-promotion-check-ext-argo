@@ -8,21 +8,21 @@ import (
 	"net/http"
 )
 
-type ArgoApiClientInterface interface {
+type ArgoApiLoginInterface interface {
 	GetApiToken(username string, password string) (string, error)
 }
 
-type ArgoApiClient struct{}
+type ArgoLoginClient struct{}
 
-func NewArgoApiClient() *ArgoApiClient {
-	return &ArgoApiClient{}
+func NewArgoLoginClient() *ArgoLoginClient {
+	return &ArgoLoginClient{}
 }
 
 type LoginResponse struct {
 	AuthToken string `json:"token"`
 }
 
-func (c *ArgoApiClient) GetApiToken(argoServer string, apiUsername string, apiPassword string) (string, error) {
+func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, apiPassword string) (string, error) {
 	loginPostData := map[string]string{
 		"username": apiUsername,
 		"password": apiPassword,
