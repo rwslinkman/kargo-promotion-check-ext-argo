@@ -1,4 +1,4 @@
-module hightechict.nl/kargo-promotion-check-ext-argo
+module rwslinkman/kargo-promotion-check-ext-argo
 
 go 1.24.0
 
