@@ -65,11 +65,11 @@ jobs:
           RELEASE_VERSION=$(cat release-version.txt || echo "")
           if [ -z "$RELEASE_VERSION" ]; then
             echo "No new release, skipping Docker build."
-            echo "RELEASED=false" >> $GITHUB_ENV
+            echo 'released=false' | tee $GITHUB_OUTPUT
           else
             echo "New release: $RELEASE_VERSION"
-            echo "RELEASED=true" >> $GITHUB_ENV
-            echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+            echo "released=true" >> $GITHUB_OUTPUT
+            echo "version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
           fi
 
   docker:
