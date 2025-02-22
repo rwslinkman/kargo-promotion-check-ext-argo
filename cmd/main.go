@@ -21,8 +21,8 @@ func main() {
 	argoServer, _ := os.LookupEnv("ARGOCD_SERVER")
 	argoApiToken, _ := os.LookupEnv("ARGOCD_API_TOKEN")
 	argoAppName, _ := os.LookupEnv("ARGOCD_APP_NAME")
-	apiUsername, isLoginMode := os.LookupEnv("API_USERNAME")
-	apiPassword, _ := os.LookupEnv("API_PASSWORD")
+	apiUsername, isLoginMode := os.LookupEnv("ARGOCD_API_USERNAME")
+	apiPassword, _ := os.LookupEnv("ARGOCD_API_PASSWORD")
 
 	if isLoginMode {
 		loginPostData := map[string]string{
