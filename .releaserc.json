@@ -1,0 +1,48 @@
+{
+  "branches": ["main"],
+  "tagFormat": "${version}",
+  "plugins": [
+    ["@semantic-release/commit-analyzer", {
+      "preset": "conventionalcommits",
+      "releaseRules": [
+        { "type": "break", "release": "major" },
+        { "type": "feat", "release": "minor" },
+        { "type": "fix", "release": "patch" },
+        { "type": "docs", "release": "patch" },
+        { "type": "refactor", "release": "patch" },
+        { "type": "ci", "release": "patch"},
+        { "type": "chore", "release": "patch"},
+        { "type": "perf", "release": "patch"},
+        { "type": "style", "release": "patch"},
+        { "type": "test", "release": "patch"},
+        { "scope": "no-release", "release": false }
+      ]
+    }],
+    ["@semantic-release/release-notes-generator", {
+      "preset": "conventionalcommits",
+      "presetConfig": {
+        "types": [
+          { "type": "break", "section": "Breaking changes", "hidden": false },
+          { "type": "feat", "section": "Features", "hidden": false },
+          { "type": "fix", "section": "Bug fixes", "hidden": false },
+          { "type": "docs", "section": "Documentation", "hidden": false },
+          { "type": "refactor", "section": "Other", "hidden": false },
+          { "type": "ci", "section": "Continuous integration", "hidden": false },
+          { "type": "chore", "section": "Other", "hidden": false },
+          { "type": "perf", "section": "Performance", "hidden": false },
+          { "type": "style", "section": "Other", "hidden": false },
+          { "type": "test", "section": "Other", "hidden": false }
+        ]
+      }
+    }],
+    ["@semantic-release/changelog", {
+      "changelogFile": "release-notes.md"
+    }],
+    ["@semantic-release/exec", {
+      "prepareCmd": "echo '${nextRelease.gitTag}' > release-version.txt"
+    }],
+    ["@semantic-release/github", {
+      "failTitle": "Unable to perform semantic release"
+    }]
+  ]
+}
