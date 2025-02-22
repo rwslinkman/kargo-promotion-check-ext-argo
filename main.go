@@ -23,7 +23,6 @@ func main() {
 		if err != nil {
 			fmt.Println("Unable to get API token from ArgoCD: ", err)
 		}
-		fmt.Println("Response Body:", apiToken)
 		argoApiToken = apiToken
 	}
 
@@ -52,4 +51,12 @@ func main() {
 	fmt.Println("Sync Status:", argoApp.Status.Sync.Status)
 	fmt.Println("Sync Revision:", argoApp.Status.Sync.Revision)
 	fmt.Println("Health Status:", argoApp.Status.Health.Status)
+
+	if argoApp.Status.Sync.Status == "Synced" {
+		fmt.Println(fmt.Sprintf("Argo App %s is currently synced\n", argoAppName))
+		os.Exit(0)
+	} else {
+		fmt.Println(fmt.Sprintf("Argo App %s is currently not in sync\n", argoAppName))
+		os.Exit(1)
+	}
 }
