@@ -5,7 +5,7 @@ COPY go.mod ./
 RUN go mod download
 
 COPY . .
-RUN go build -o kargo-promotion-check-ext-argo cmd/main.go
+RUN go build -o kargo-promotion-check-ext-argo main.go
 
 # Multiphase build
 FROM alpine:3.21.3
