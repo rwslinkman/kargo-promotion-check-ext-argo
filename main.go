@@ -11,29 +11,29 @@ import (
 )
 
 func main() {
-	argoServer, _ := os.LookupEnv("ARGOCD_SERVER")
-	argoApiToken, _ := os.LookupEnv("ARGOCD_API_TOKEN")
-	argoAppName, _ := os.LookupEnv("ARGOCD_APP_NAME")
-	apiUsername, isLoginMode := os.LookupEnv("ARGOCD_API_USERNAME")
-	apiPassword, _ := os.LookupEnv("ARGOCD_API_PASSWORD")
 
-	if isLoginMode {
+	config, err := internal.LoadConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	argoApiToken := config.ArgoApiToken // might be nil
+	if config.AuthMode == internal.LoginMode {
+		// ensure having an API Token
 		argoApiClient := internal.NewArgoApiClient()
-		var apiToken, err = argoApiClient.GetApiToken(argoServer, apiUsername, apiPassword)
+		var apiToken, err = argoApiClient.GetApiToken(config.ArgoServer, config.ApiUsername, config.ApiPassword)
 		if err != nil {
 			fmt.Println("Unable to get API token from ArgoCD: ", err)
 		}
 		argoApiToken = apiToken
 	}
 
-	// Create API client options
+	// Create API client with API token to interact with external Argo CD instance
 	clientOpts := apiclient.ClientOptions{
-		ServerAddr: argoServer,
+		ServerAddr: config.ArgoServer,
 		AuthToken:  argoApiToken,
 		GRPCWeb:    true,
 	}
-
-	// Initialize the API client
 	argoApiClient, err := apiclient.NewClient(&clientOpts)
 	if err != nil {
 		log.Fatalf("Failed to create Argo CD API client: %v", err)
@@ -41,7 +41,7 @@ func main() {
 	}
 
 	_, argoAppClient := argoApiClient.NewApplicationClientOrDie()
-	appQuery := application.ApplicationQuery{Name: &argoAppName}
+	appQuery := application.ApplicationQuery{Name: &config.ArgoAppName}
 
 	var argoApp, getErr = argoAppClient.Get(context.Background(), &appQuery)
 	if getErr != nil {
@@ -53,10 +53,10 @@ func main() {
 	fmt.Println("Health Status:", argoApp.Status.Health.Status)
 
 	if argoApp.Status.Sync.Status == "Synced" {
-		fmt.Println(fmt.Sprintf("Argo App %s is currently synced\n", argoAppName))
+		fmt.Println(fmt.Sprintf("Argo App %s is currently synced\n", config.ArgoAppName))
 		os.Exit(0)
 	} else {
-		fmt.Println(fmt.Sprintf("Argo App %s is currently not in sync\n", argoAppName))
+		fmt.Println(fmt.Sprintf("Argo App %s is currently not in sync\n", config.ArgoAppName))
 		os.Exit(1)
 	}
 }
