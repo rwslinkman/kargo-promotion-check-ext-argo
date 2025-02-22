@@ -59,7 +59,7 @@ jobs:
       - name: Run Semantic Release
         id: semantic
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           npx semantic-release
           RELEASE_VERSION=$(cat release-version.txt || echo "")
