@@ -23,7 +23,7 @@ type LoginResponse struct {
 	AuthToken string `json:"token"`
 }
 
-func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, apiPassword string) (string, error) {
+func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, apiPassword string, allowInsecure bool) (string, error) {
 	loginPostData := map[string]string{
 		"username": apiUsername,
 		"password": apiPassword,
@@ -35,7 +35,11 @@ func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, api
 	}
 
 	// Create HTTP POST request
-	argoLoginUrl := fmt.Sprintf("http://%s/api/v1/session", argoServer)
+	protocol := "https"
+	if allowInsecure {
+		protocol = "http"
+	}
+	argoLoginUrl := fmt.Sprintf("%s://%s/api/v1/session", protocol, argoServer)
 	req, err := http.NewRequest("POST", argoLoginUrl, bytes.NewBuffer(loginJsonData))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
@@ -46,7 +50,7 @@ func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, api
 	// Execute the request
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true, // Skip TLS verification
+			InsecureSkipVerify: allowInsecure, // Skip TLS verification if true
 		},
 	}
 	client := &http.Client{
