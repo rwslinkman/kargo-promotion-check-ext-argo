@@ -33,7 +33,7 @@ func main() {
 		ServerAddr: config.ArgoServer,
 		AuthToken:  argoApiToken,
 		GRPCWeb:    true,
-		Insecure:   true,
+		Insecure:   config.AllowInsecure,
 	}
 	argoApiClient := apiclient.NewClientOrDie(&clientOpts)
 
