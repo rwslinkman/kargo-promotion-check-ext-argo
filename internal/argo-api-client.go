@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,7 +35,7 @@ func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, api
 	}
 
 	// Create HTTP POST request
-	argoLoginUrl := fmt.Sprintf("https://%s/api/v1/session", argoServer)
+	argoLoginUrl := fmt.Sprintf("http://%s/api/v1/session", argoServer)
 	req, err := http.NewRequest("POST", argoLoginUrl, bytes.NewBuffer(loginJsonData))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
@@ -43,7 +44,14 @@ func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, api
 	req.Header.Set("Content-Type", "application/json")
 
 	// Execute the request
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true, // Skip TLS verification
+		},
+	}
+	client := &http.Client{
+		Transport: tr,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error making request:", err)
