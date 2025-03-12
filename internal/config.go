@@ -13,12 +13,13 @@ const (
 )
 
 type Config struct {
-	ArgoServer   string
-	ArgoApiToken string
-	ArgoAppName  string
-	ApiUsername  string
-	ApiPassword  string
-	AuthMode     AuthMode
+	ArgoServer     string
+	ArgoApiToken   string
+	ArgoAppName    string
+	ApiUsername    string
+	ApiPassword    string
+	AuthMode       AuthMode
+	TargetRevision string
 }
 
 // LoadConfig reads environment variables and initializes the configuration
@@ -28,10 +29,11 @@ func LoadConfig() (*Config, error) {
 	argoAppName, hasAppName := os.LookupEnv("ARGOCD_APP_NAME")
 	apiUsername, hasUsername := os.LookupEnv("ARGOCD_API_USERNAME")
 	apiPassword, hasPassword := os.LookupEnv("ARGOCD_API_PASSWORD")
+	targetRevision, hasTargetRevision := os.LookupEnv("KPCEA_TARGET_REVISION")
 
 	// Ensure mandatory fields are present
-	if !hasServer || !hasAppName || argoServer == "" || argoAppName == "" {
-		return nil, fmt.Errorf("ARGOCD_SERVER and ARGOCD_APP_NAME must be set")
+	if !hasServer || !hasAppName || argoServer == "" || argoAppName == "" || !hasTargetRevision || targetRevision == "" {
+		return nil, fmt.Errorf("KPCEA_TARGET_REVISION, ARGOCD_SERVER and ARGOCD_APP_NAME must be set")
 	}
 
 	// Determine authentication mode
@@ -47,11 +49,12 @@ func LoadConfig() (*Config, error) {
 
 	// Return configuration struct
 	return &Config{
-		ArgoServer:   argoServer,
-		ArgoApiToken: argoApiToken,
-		ArgoAppName:  argoAppName,
-		ApiUsername:  apiUsername,
-		ApiPassword:  apiPassword,
-		AuthMode:     authMode,
+		ArgoServer:     argoServer,
+		ArgoApiToken:   argoApiToken,
+		ArgoAppName:    argoAppName,
+		ApiUsername:    apiUsername,
+		ApiPassword:    apiPassword,
+		AuthMode:       authMode,
+		TargetRevision: targetRevision,
 	}, nil
 }
