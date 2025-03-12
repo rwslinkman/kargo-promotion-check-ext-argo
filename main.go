@@ -11,21 +11,17 @@ import (
 )
 
 func main() {
-	timeout := 30 * time.Second
-	interval := 5 * time.Second
-	// TODO: Move above to config
 	config, err := internal.LoadConfig()
 	if err != nil {
 		panic(err)
 	}
-	// TODO: add INSECURE parameter for ArgoCD client and HTTP client
 	fmt.Printf("KPCEA started in %s mode \n", config.AuthMode)
 
 	argoApiToken := config.ArgoApiToken // might be nil
 	if config.AuthMode == internal.LoginMode {
 		// ensure having an API Token
 		argoApiClient := internal.NewArgoLoginClient()
-		var apiToken, err = argoApiClient.GetApiToken(config.ArgoServer, config.ApiUsername, config.ApiPassword)
+		var apiToken, err = argoApiClient.GetApiToken(config.ArgoServer, config.ApiUsername, config.ApiPassword, config.AllowInsecure)
 		if err != nil {
 			fmt.Println("Unable to get API token from ArgoCD: ", err)
 		}
@@ -49,7 +45,7 @@ func main() {
 	success := false
 
 	for {
-		if time.Since(start) > timeout {
+		if time.Since(start) > config.PollTimeout {
 			fmt.Println("Timeout reached while waiting for app to sync")
 			break
 		}
@@ -74,7 +70,8 @@ func main() {
 			fmt.Println("App is not in sync, retrying..")
 		}
 
-		time.Sleep(interval)
+		// Success state not reached, try again after interval
+		time.Sleep(config.PollInterval)
 	}
 
 	if success {
