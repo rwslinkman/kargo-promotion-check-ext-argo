@@ -50,17 +50,18 @@ spec:
 The container must be configured with a few parameters and has some optional config.  
 These need to be set as environment variables.   
 
-| Variable                | Description                        | Required    | Note                                                  |
-|-------------------------|------------------------------------|-------------|-------------------------------------------------------|
-| `ARGOCD_SERVER`         | The Argo CD server address         | Yes         | Remove protocol from URL when providing (no https://) |
-| `ARGOCD_API_TOKEN`      | API token for authentication       | Conditional | Only required in TOKEN mode                           |
-| `ARGOCD_APP_NAME`       | The Argo CD application name       | Yes         | n/a                                                   |
-| `ARGOCD_API_USERNAME`   | Username for Argo CD API access    | Conditional | Only required in LOGIN mode                           |
-| `ARGOCD_API_PASSWORD`   | Password for Argo CD API access    | Conditional | Only required in LOGIN mode                           |
-| `KPCEA_TARGET_REVISION` | Target Git revision for deployment | Yes         | n/a                                                   |
-| `KPCEA_TIMEOUT`         | Timeout duration (in seconds)      | No          | Defaults to `30` seconds                              |
-| `KPCEA_INTERVAL`        | Sync interval (in seconds)         | No          | Defaults to `5` seconds                               |
-| `KPCEA_INSECURE`        | Allow insecure connections         | No          | Defaults to `false`                                   |
+| Variable                | Description                          | Required    | Note                                                  |
+|-------------------------|--------------------------------------|-------------|-------------------------------------------------------|
+| `ARGOCD_SERVER`         | The Argo CD server address           | Yes         | Remove protocol from URL when providing (no https://) |
+| `ARGOCD_API_TOKEN`      | API token for authentication         | Conditional | Only required in TOKEN mode                           |
+| `ARGOCD_APP_NAME`       | The Argo CD application name         | Yes         | n/a                                                   |
+| `ARGOCD_API_USERNAME`   | Username for Argo CD API access      | Conditional | Only required in LOGIN mode                           |
+| `ARGOCD_API_PASSWORD`   | Password for Argo CD API access      | Conditional | Only required in LOGIN mode                           |
+| `KPCEA_TARGET_REVISION` | Target Git revision for deployment   | Yes         | n/a                                                   |
+| `KPCEA_TIMEOUT`         | Timeout duration (in seconds)        | No          | Defaults to `30` seconds                              |
+| `KPCEA_INTERVAL`        | Sync interval (in seconds)           | No          | Defaults to `5` seconds                               |
+| `KPCEA_INSECURE`        | Allow insecure connections           | No          | Defaults to `false`                                   |
+| `KPCEA_USE_GRPC`        | Use gRPC connection instead of HTTPS | No          | Defaults to `false`                                   |
 
 ### TOKEN mode vs. LOGIN Mode
 KPCEA relies on a [local user from ArgoCD](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#create-new-user) to get access to the desired ArgoCD instance.  

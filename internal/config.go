@@ -25,6 +25,7 @@ type Config struct {
 	PollTimeout    time.Duration
 	PollInterval   time.Duration
 	AllowInsecure  bool
+	UseGRPC        bool
 }
 
 // LoadConfig reads environment variables and initializes the configuration
@@ -72,6 +73,10 @@ func LoadConfig() (*Config, error) {
 	if !hasInsecure {
 		allowInsecure = "false"
 	}
+	useGrpc, hasUseGrpc := os.LookupEnv("KPCEA_USE_GRPC")
+	if !hasUseGrpc {
+		useGrpc = "false"
+	}
 
 	// Return configuration struct
 	return &Config{
@@ -85,5 +90,6 @@ func LoadConfig() (*Config, error) {
 		PollTimeout:    time.Duration(timeoutSeconds) * time.Second,
 		PollInterval:   time.Duration(intervalSeconds) * time.Second,
 		AllowInsecure:  allowInsecure == "true",
+		UseGRPC:        useGrpc == "true",
 	}, nil
 }

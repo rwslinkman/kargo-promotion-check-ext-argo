@@ -26,16 +26,18 @@ func main() {
 			fmt.Println("Unable to get API token from ArgoCD: ", err)
 		}
 		argoApiToken = apiToken
+		fmt.Println("Successfully got a temporary API token from ArgoCD")
 	}
 
 	// Create API client with API token to interact with external Argo CD instance
 	clientOpts := apiclient.ClientOptions{
 		ServerAddr: config.ArgoServer,
 		AuthToken:  argoApiToken,
-		GRPCWeb:    true,
+		GRPCWeb:    false, // use https instead of grpc
 		Insecure:   config.AllowInsecure,
 	}
 	argoApiClient := apiclient.NewClientOrDie(&clientOpts)
+	fmt.Println("ArgoCD API client created")
 
 	_, argoAppClient := argoApiClient.NewApplicationClientOrDie()
 	appQuery := application.ApplicationQuery{Name: &config.ArgoAppName}
@@ -50,9 +52,11 @@ func main() {
 			break
 		}
 
+		fmt.Println("Fetching app details from ArgoCD...")
 		argoApp, getErr := argoAppClient.Get(ctx, &appQuery)
 		if getErr != nil {
 			fmt.Printf("Failed to fetch App details: %v\n", getErr)
+			fmt.Println("Retrying failed request")
 			continue
 		}
 
