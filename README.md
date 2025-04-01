@@ -61,7 +61,6 @@ These need to be set as environment variables.
 | `KPCEA_TIMEOUT`         | Timeout duration (in seconds)        | No          | Defaults to `30` seconds                              |
 | `KPCEA_INTERVAL`        | Sync interval (in seconds)           | No          | Defaults to `5` seconds                               |
 | `KPCEA_INSECURE`        | Allow insecure connections           | No          | Defaults to `false`                                   |
-| `KPCEA_USE_GRPC`        | Use gRPC connection instead of HTTPS | No          | Defaults to `false`                                   |
 
 ### TOKEN mode vs. LOGIN Mode
 KPCEA relies on a [local user from ArgoCD](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#create-new-user) to get access to the desired ArgoCD instance.  

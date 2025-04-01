@@ -64,16 +64,24 @@ func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, api
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
+	// TODO: Handle errors from ArgoCD API e.g. {"error":"Invalid username or password","code":16,"message":"Invalid username or password"}
 	if err != nil {
 		fmt.Println("Error reading response:", err)
 		return "", err
 	}
+	debug := string(body)
+	fmt.Println(debug)
 
 	// Map JSON response to struct
 	var loginResp LoginResponse
 	err = json.Unmarshal(body, &loginResp)
 	if err != nil {
 		fmt.Println("Error decoding JSON:", err)
+		return "", err
+	}
+
+	if loginResp.AuthToken == "" {
+		fmt.Println("Unable to get API token from ArgoCD: ", string(body))
 		return "", err
 	}
 
