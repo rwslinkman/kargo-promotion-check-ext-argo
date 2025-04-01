@@ -29,11 +29,12 @@ func main() {
 		fmt.Println("Successfully got a temporary API token from ArgoCD")
 	}
 
+	fmt.Println(argoApiToken)
 	// Create API client with API token to interact with external Argo CD instance
 	clientOpts := apiclient.ClientOptions{
 		ServerAddr: config.ArgoServer,
 		AuthToken:  argoApiToken,
-		GRPCWeb:    false, // use https instead of grpc
+		GRPCWeb:    true,
 		Insecure:   config.AllowInsecure,
 	}
 	argoApiClient := apiclient.NewClientOrDie(&clientOpts)
