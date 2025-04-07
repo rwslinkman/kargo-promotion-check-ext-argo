@@ -5,3 +5,6 @@
 compose.yaml
 Dockerfile
 kargo-promotion-check-ext-argo
+coverage.html
+coverage.out
+.releaserc.json

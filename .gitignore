@@ -1,3 +1,5 @@
 .idea
 .env
 kargo-promotion-check-ext-argo
+coverage.html
+coverage.out
