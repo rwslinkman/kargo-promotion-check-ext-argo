@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/application"
+	"net/http"
 	"os"
 	"rwslinkman/kargo-promotion-check-ext-argo/internal"
 	"time"
@@ -20,16 +22,23 @@ func main() {
 	argoApiToken := config.ArgoApiToken // might be nil
 	if config.AuthMode == internal.LoginMode {
 		// ensure having an API Token
-		argoApiClient := internal.NewArgoLoginClient()
+		client := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: config.AllowInsecure,
+				},
+			},
+		}
+		argoApiClient := internal.NewArgoLoginClient(client)
 		var apiToken, err = argoApiClient.GetApiToken(config.ArgoServer, config.ApiUsername, config.ApiPassword, config.AllowInsecure)
 		if err != nil {
 			fmt.Println("Unable to get API token from ArgoCD: ", err)
+			panic(err)
 		}
 		argoApiToken = apiToken
 		fmt.Println("Successfully got a temporary API token from ArgoCD")
 	}
 
-	fmt.Println(argoApiToken)
 	// Create API client with API token to interact with external Argo CD instance
 	clientOpts := apiclient.ClientOptions{
 		ServerAddr: config.ArgoServer,

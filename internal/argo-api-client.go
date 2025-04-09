@@ -2,21 +2,28 @@ package internal
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 )
 
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type ArgoApiLoginInterface interface {
 	GetApiToken(username string, password string) (string, error)
 }
 
-type ArgoLoginClient struct{}
+type ArgoLoginClient struct {
+	client HTTPClient
+}
 
-func NewArgoLoginClient() *ArgoLoginClient {
-	return &ArgoLoginClient{}
+func NewArgoLoginClient(client HTTPClient) *ArgoLoginClient {
+	return &ArgoLoginClient{
+		client: client,
+	}
 }
 
 type LoginResponse struct {
@@ -48,15 +55,7 @@ func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, api
 	req.Header.Set("Content-Type", "application/json")
 
 	// Execute the request
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: allowInsecure, // Skip TLS verification if true
-		},
-	}
-	client := &http.Client{
-		Transport: tr,
-	}
-	resp, err := client.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		fmt.Println("Error making request:", err)
 		return "", err
@@ -64,13 +63,16 @@ func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, api
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-	// TODO: Handle errors from ArgoCD API e.g. {"error":"Invalid username or password","code":16,"message":"Invalid username or password"}
 	if err != nil {
 		fmt.Println("Error reading response:", err)
 		return "", err
 	}
-	debug := string(body)
-	fmt.Println(debug)
+
+	if resp.StatusCode != 200 {
+		// TODO: Handle errors from ArgoCD API e.g. {"error":"Invalid username or password","code":16,"message":"Invalid username or password"}
+		fmt.Println(string(body))
+		return "", fmt.Errorf("token request not accepted by ArgoCD (http %d)", resp.StatusCode)
+	}
 
 	// Map JSON response to struct
 	var loginResp LoginResponse
@@ -81,8 +83,8 @@ func (c *ArgoLoginClient) GetApiToken(argoServer string, apiUsername string, api
 	}
 
 	if loginResp.AuthToken == "" {
-		fmt.Println("Unable to get API token from ArgoCD: ", string(body))
-		return "", err
+		fmt.Println("Unable to get API token from ArgoCD")
+		return "", fmt.Errorf("unable to get API token from ArgoCD")
 	}
 
 	return loginResp.AuthToken, nil

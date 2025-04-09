@@ -2,7 +2,10 @@ module rwslinkman/kargo-promotion-check-ext-argo
 
 go 1.24.0
 
-require github.com/argoproj/argo-cd/v2 v2.14.9
+require (
+	github.com/argoproj/argo-cd/v2 v2.14.9
+	github.com/stretchr/testify v1.10.0
+)
 
 require (
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
@@ -93,6 +96,7 @@ require (
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.20.5 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
