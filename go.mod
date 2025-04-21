@@ -3,7 +3,7 @@ module rwslinkman/kargo-promotion-check-ext-argo
 go 1.24.0
 
 require (
-	github.com/argoproj/argo-cd/v2 v2.14.9
+	github.com/argoproj/argo-cd/v2 v2.14.10
 	github.com/stretchr/testify v1.10.0
 )
 
