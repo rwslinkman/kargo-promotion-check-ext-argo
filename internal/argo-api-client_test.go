@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -17,10 +18,14 @@ func (m *MockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return m.Resp, m.Err
 }
 
-func NewMockHTTPClient(statusCode int, responseBody string, err error) *MockHTTPClient {
+func NewMockHTTPClient(statusCode int, hasResponse bool, responseBody string, err error) *MockHTTPClient {
+	response := strings.NewReader(responseBody)
+	if !hasResponse {
+		response = nil
+	}
 	mockResp := &http.Response{
 		StatusCode: statusCode,
-		Body:       io.NopCloser(strings.NewReader(responseBody)),
+		Body:       io.NopCloser(response),
 	}
 	return &MockHTTPClient{
 		Resp: mockResp,
@@ -29,7 +34,7 @@ func NewMockHTTPClient(statusCode int, responseBody string, err error) *MockHTTP
 }
 
 func TestArgoLoginClient_GetApiToken(t *testing.T) {
-	mockClient := NewMockHTTPClient(200, `{"token": "mock-token"}`, nil)
+	mockClient := NewMockHTTPClient(200, true, `{"token": "mock-token"}`, nil)
 	argoClient := NewArgoLoginClient(mockClient)
 
 	token, err := argoClient.GetApiToken("myServer", "myUser", "myPass", false)
@@ -39,7 +44,7 @@ func TestArgoLoginClient_GetApiToken(t *testing.T) {
 }
 
 func TestArgoLoginClient_GetApiToken_Insecure(t *testing.T) {
-	mockClient := NewMockHTTPClient(200, `{"token": "mock-token"}`, nil)
+	mockClient := NewMockHTTPClient(200, true, `{"token": "mock-token"}`, nil)
 	argoClient := NewArgoLoginClient(mockClient)
 
 	token, err := argoClient.GetApiToken("myServer", "myUser", "myPass", true)
@@ -49,22 +54,64 @@ func TestArgoLoginClient_GetApiToken_Insecure(t *testing.T) {
 }
 
 func TestArgoLoginClient_GetApiToken_FailedHttpRequest(t *testing.T) {
-	mockClient := NewMockHTTPClient(401, `{"error":"Invalid username or password","code":16,"message":"Invalid username or password"}`, nil)
+	mockClient := NewMockHTTPClient(401, true, `{"error":"Invalid username or password","code":16,"message":"Invalid username or password"}`, nil)
 	argoClient := NewArgoLoginClient(mockClient)
 
 	_, err := argoClient.GetApiToken("myServer", "myUser", "myPass", true)
 
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "token request not accepted by ArgoCD (http 401)")
+	assert.Equal(t, "token request not accepted by ArgoCD (http 401)", err.Error())
 }
 
 func TestArgoLoginClient_GetApiToken_EmptyToken(t *testing.T) {
-	mockClient := NewMockHTTPClient(200, `{"token": ""}`, nil)
+	mockClient := NewMockHTTPClient(200, true, `{"token": ""}`, nil)
 
 	argoClient := NewArgoLoginClient(mockClient)
 
 	_, err := argoClient.GetApiToken("myServer", "myUser", "myPass", true)
 
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "unable to get API token from ArgoCD")
+	assert.Equal(t, "unable to get API token from ArgoCD", err.Error())
 }
+
+func TestArgoLoginClient_GetApiToken_UnableToCreateRequest(t *testing.T) {
+	mockClient := NewMockHTTPClient(0, false, "", nil)
+	argoClient := NewArgoLoginClient(mockClient)
+
+	_, err := argoClient.GetApiToken("\t", "myUser", "myPass", true)
+
+	assert.Error(t, err)
+	assert.Equal(t, `parse "http://\t/api/v1/session": net/url: invalid control character in URL`, err.Error())
+}
+
+func TestArgoLoginClient_GetApiToken_HttpClientError(t *testing.T) {
+	mockClient := NewMockHTTPClient(0, false, "", fmt.Errorf("testError"))
+	argoClient := NewArgoLoginClient(mockClient)
+
+	_, err := argoClient.GetApiToken("argoServer", "myUser", "myPass", true)
+
+	assert.Error(t, err)
+	assert.Equal(t, "testError", err.Error())
+}
+
+func TestArgoLoginClient_GetApiToken_ResponseBodyIsNotJson(t *testing.T) {
+	mockClient := NewMockHTTPClient(200, true, "", nil)
+	argoClient := NewArgoLoginClient(mockClient)
+
+	_, err := argoClient.GetApiToken("argoServer", "myUser", "myPass", true)
+
+	assert.Error(t, err)
+	assert.Equal(t, "unexpected end of JSON input", err.Error())
+}
+
+func TestArgoLoginClient_GetApiToken_ResponseBodyHasNoToken(t *testing.T) {
+	mockClient := NewMockHTTPClient(200, true, `{"notToken": ""}`, nil)
+	argoClient := NewArgoLoginClient(mockClient)
+
+	_, err := argoClient.GetApiToken("argoServer", "myUser", "myPass", true)
+
+	assert.Error(t, err)
+	assert.Equal(t, "unable to get API token from ArgoCD", err.Error())
+}
+
+// TODO: Add test for error in io.ReadAll
