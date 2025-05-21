@@ -50,17 +50,19 @@ spec:
 The container must be configured with a few parameters and has some optional config.  
 These need to be set as environment variables.   
 
-| Variable                | Description                          | Required    | Note                                                  |
-|-------------------------|--------------------------------------|-------------|-------------------------------------------------------|
-| `ARGOCD_SERVER`         | The Argo CD server address           | Yes         | Remove protocol from URL when providing (no https://) |
-| `ARGOCD_API_TOKEN`      | API token for authentication         | Conditional | Only required in TOKEN mode                           |
-| `ARGOCD_APP_NAME`       | The Argo CD application name         | Yes         | n/a                                                   |
-| `ARGOCD_API_USERNAME`   | Username for Argo CD API access      | Conditional | Only required in LOGIN mode                           |
-| `ARGOCD_API_PASSWORD`   | Password for Argo CD API access      | Conditional | Only required in LOGIN mode                           |
-| `KPCEA_TARGET_REVISION` | Target Git revision for deployment   | Yes         | n/a                                                   |
-| `KPCEA_TIMEOUT`         | Timeout duration (in seconds)        | No          | Defaults to `30` seconds                              |
-| `KPCEA_INTERVAL`        | Sync interval (in seconds)           | No          | Defaults to `5` seconds                               |
-| `KPCEA_INSECURE`        | Allow insecure connections           | No          | Defaults to `false`                                   |
+| Variable                  | Description                                     | Required    | Note                                                            |
+|---------------------------|-------------------------------------------------|-------------|-----------------------------------------------------------------|
+| `ARGOCD_SERVER`           | The Argo CD server address                      | Yes         | Remove protocol from URL when providing (no https://)           |
+| `ARGOCD_API_TOKEN`        | API token for authentication                    | Conditional | Only required in TOKEN mode                                     |
+| `ARGOCD_APP_NAME`         | The Argo CD application name                    | Yes         | n/a                                                             |
+| `ARGOCD_API_USERNAME`     | Username for Argo CD API access                 | Conditional | Only required in LOGIN mode                                     |
+| `ARGOCD_API_PASSWORD`     | Password for Argo CD API access                 | Conditional | Only required in LOGIN mode                                     |
+| `KPCEA_VERIFY_MODE`       | Strategy to verify state of external ArgoCD app | Yes         | Value can be `EXACT`, `SEARCH_COMMIT_MSG`. Defaults to `EXACT`. |
+| `KPCEA_TARGET_REVISION`   | Target Git revision for deployment              | Conditional | Required when using `EXACT` verification mode                   |
+| `KPCEA_SEARCH_COMMIT_MSG` | Search argument for commit message              | Conditional | Required when using `SEARCH_COMMIT_MSG` verification mode       |
+| `KPCEA_TIMEOUT`           | Timeout duration (in seconds)                   | No          | Defaults to `30` seconds                                        |
+| `KPCEA_INTERVAL`          | Sync interval (in seconds)                      | No          | Defaults to `5` seconds                                         |
+| `KPCEA_INSECURE`          | Allow insecure connections                      | No          | Defaults to `false`                                             |
 
 ### TOKEN mode vs. LOGIN Mode
 KPCEA relies on a [local user from ArgoCD](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#create-new-user) to get access to the desired ArgoCD instance.  
@@ -70,3 +72,8 @@ If you are not able to get a token from ArgoCD, it is possible to use LOGIN mode
 Provide the `ARGOCD_API_USERNAME` and `ARGOCD_API_PASSWORD` parameters and leave the `ARGOCD_API_TOKEN` empty.  
 The KPCEA client will pick this up and retrieves a (temporary) token from ArgoCD for 1 session.   
 
+### Verification modes
+KPCEA supportes 2 types of verifying that an external ArgoCD app is at the correct revision.   
+The default `KPCEA_VERIFY_MODE` is `EXACT` mode, where the synced revision must exactly match the `KPCEA_TARGET_REVISION` value.      
+Another option is the `SEARCH_COMMIT_MSG` mode, which can be activated using the `KPCEA_VERIFY_MODE` parameter.   
+In this mode, KPCEA will fetch the attached commit message and verify if it contains the `KPCEA_SEARCH_COMMIT_MSG` value as substring.   
