@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"rwslinkman/kargo-promotion-check-ext-argo/internal"
+	"strings"
 	"time"
 )
 
@@ -74,12 +75,38 @@ func main() {
 		fmt.Println("Sync Revision:", argoApp.Status.Sync.Revision)
 		fmt.Println("Health Status:", argoApp.Status.Health.Status)
 
-		if argoApp.Status.Sync.Status == "Synced" &&
-			argoApp.Status.Health.Status == "Healthy" &&
-			argoApp.Status.Sync.Revision == config.TargetRevision {
-			fmt.Println("App is synced, healthy, and at the correct revision!")
-			success = true
-			break
+		if argoApp.Status.Sync.Status == "Synced" && argoApp.Status.Health.Status == "Healthy" {
+			if config.VerifyMode == internal.Exact {
+				// Verify exact
+				if argoApp.Status.Sync.Revision == config.TargetRevision {
+					fmt.Println("App is synced, healthy, and at the expected target revision!")
+					success = true
+					break
+				} else {
+					fmt.Printf("App is synced, healthy, but not at expected revision. Expected %s but found %s \n", config.TargetRevision, argoApp.Status.Sync.Revision)
+				}
+			} else {
+				// Fetch metadata for commit message
+				revisionMetadata, fetchErr := argoAppClient.RevisionMetadata(ctx, &application.RevisionMetadataQuery{
+					Name:     &config.ArgoAppName,
+					Revision: &argoApp.Status.Sync.Revision,
+				})
+				if fetchErr != nil {
+					fmt.Printf("Failed to get revision metadata: %v\n", fetchErr)
+					panic(fetchErr)
+				}
+
+				fmt.Println("Synced Revision's Message: " + revisionMetadata.Message)
+				match := strings.Contains(revisionMetadata.Message, config.SearchCommitMessage)
+				if match {
+					fmt.Println("App is synced, healthy, and commit message matches expectation!")
+					success = true
+					break
+				} else {
+					fmt.Println("App is synced, healthy, but commit message does not contain expected value")
+				}
+			}
+
 		} else {
 			fmt.Println("App is not in sync, retrying..")
 		}
@@ -88,11 +115,13 @@ func main() {
 		time.Sleep(config.PollInterval)
 	}
 
+	var exitCode = 1
+	var exitMsgPart = " NOT"
 	if success {
-		fmt.Println(fmt.Sprintf("Argo App %s is currently synced\n", config.ArgoAppName))
-		os.Exit(0)
-	} else {
-		fmt.Println(fmt.Sprintf("Argo App %s is currently not in sync\n", config.ArgoAppName))
-		os.Exit(1)
+		exitCode = 0
+		exitMsgPart = ""
 	}
+	fmt.Printf("Argo App '%s' is currently%s in expected state\n", config.ArgoAppName, exitMsgPart)
+	fmt.Println("KPCEA completed")
+	os.Exit(exitCode)
 }
