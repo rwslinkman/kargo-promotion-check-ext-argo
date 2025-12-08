@@ -8,7 +8,7 @@ COPY . .
 RUN go build -o kargo-promotion-check-ext-argo main.go
 
 # Multiphase build
-FROM alpine:3.22.2
+FROM alpine:3.23.0
 
 WORKDIR /app
 COPY --from=builder /app/kargo-promotion-check-ext-argo /app/kpcea
