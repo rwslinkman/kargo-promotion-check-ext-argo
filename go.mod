@@ -163,6 +163,10 @@ require (
 )
 
 replace (
+
+	// filepath-securejoin v0.4.x changed MkdirAll's mode param from int to os.FileMode,
+	// breaking argo-cd v2.14.21. Pin to the last v0.3.x until argo-cd is updated.
+	github.com/cyphar/filepath-securejoin => github.com/cyphar/filepath-securejoin v0.3.4
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 => github.com/OvyFlash/telegram-bot-api/v5 v5.0.0-20240108230938-63e5c59035bf
 
 	github.com/golang/protobuf => github.com/golang/protobuf v1.5.4
