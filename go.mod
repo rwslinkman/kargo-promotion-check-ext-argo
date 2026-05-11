@@ -1,6 +1,6 @@
 module rwslinkman/kargo-promotion-check-ext-argo
 
-go 1.24.6
+go 1.26.3
 
 require (
 	github.com/argoproj/argo-cd/v2 v2.14.21
