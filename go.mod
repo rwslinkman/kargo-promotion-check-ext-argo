@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	github.com/argoproj/argo-cd/v2 v2.14.21
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 )
 
 require (
@@ -97,7 +97,6 @@ require (
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pjbgf/sha1cd v0.6.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.20.5 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
